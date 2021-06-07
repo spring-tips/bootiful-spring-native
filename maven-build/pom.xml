@@ -10,7 +10,7 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.example</groupId>
-    <artifactId>maven</artifactId>
+    <artifactId>maven-build</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>maven</name>
     <description>Demo project for Spring Boot</description>
