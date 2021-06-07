@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 
-docker run docker.io/library/reactive:0.0.1-SNAPSHOT
+docker run -p8080:8080 docker.io/library/reactive:0.0.1-SNAPSHOT
 
