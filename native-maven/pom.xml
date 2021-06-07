@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.5.0</version>
+        <relativePath/> <!-- lookup parent from repository -->
+    </parent>
+    <groupId>com.example</groupId>
+    <artifactId>native-maven</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <name>native-maven</name>
+    <description>Demo project for Spring Boot</description>
+    <properties>
+        <!--
+        we've added the following two properties
+        -->
+		<native.build.args/>
+        <native.buildtools.version>0.1.0-SNAPSHOT</native.buildtools.version>
+        <java.version>11</java.version>
+        <spring-native.version>0.10.0-SNAPSHOT</spring-native.version>
+    </properties>
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.experimental</groupId>
+            <artifactId>spring-native</artifactId>
+            <version>${spring-native.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <!--
+                removed the typical buildpacks goodness here. though, you could leave it in. It's not a problem to support
+                both buildpacks and local builds.
+                -->
+            </plugin>
+            <plugin>
+                <groupId>org.springframework.experimental</groupId>
+                <artifactId>spring-aot-maven-plugin</artifactId>
+                <version>${spring-native.version}</version>
+                <executions>
+                    <execution>
+                        <id>test-generate</id>
+                        <goals>
+                            <goal>test-generate</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>generate</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+
+
+        <!--		-->
+
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-maven-plugin</artifactId>
+                    <configuration>
+                        <classifier>${classifier}</classifier>
+                        <image>
+                            <builder>${builder}</builder>
+                            <env>
+                                <BP_NATIVE_IMAGE>true</BP_NATIVE_IMAGE>
+                                <BP_NATIVE_IMAGE_BUILD_ARGUMENTS>
+                                    ${native.build.args}
+                                </BP_NATIVE_IMAGE_BUILD_ARGUMENTS>
+                            </env>
+                            <pullPolicy>IF_NOT_PRESENT</pullPolicy>
+                        </image>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.springframework.experimental</groupId>
+                    <artifactId>spring-aot-maven-plugin</artifactId>
+                    <version>0.10.0-SNAPSHOT</version>
+                    <executions>
+                        <execution>
+                            <id>test-generate</id>
+                            <goals>
+                                <goal>test-generate</goal>
+                            </goals>
+                        </execution>
+                        <execution>
+                            <id>generate</id>
+                            <goals>
+                                <goal>generate</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.graalvm.buildtools</groupId>
+                    <artifactId>native-maven-plugin</artifactId>
+                    <version>${native.buildtools.version}</version>
+                    <configuration>
+                        <imageName>${project.artifactId}</imageName>
+                        <buildArgs>${native.build.args}</buildArgs>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>build</goal>
+                            </goals>
+                            <phase>package</phase>
+                        </execution>
+                        <execution>
+                            <id>test</id>
+                            <goals>
+                                <goal>test</goal>
+                            </goals>
+                            <phase>test</phase>
+                        </execution>
+                    </executions>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+
+        <!--		-->
+    </build>
+
+
+    <!--	-->
+    <profiles>
+        <profile>
+            <id>native</id>
+            <properties>
+                <classifier>exec</classifier>
+            </properties>
+            <dependencies>
+                <!--
+                    Won't be need as of JUnit 5.8, see https://github.com/junit-team/junit5/issues/2619
+                -->
+                <dependency>
+                    <groupId>org.graalvm.buildtools</groupId>
+                    <artifactId>junit-platform-native</artifactId>
+                    <version>${native.buildtools.version}</version>
+                    <scope>test</scope>
+                </dependency>
+            </dependencies>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.graalvm.buildtools</groupId>
+                        <artifactId>native-maven-plugin</artifactId>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+    <!--	-->
+
+    <repositories>
+        <repository>
+            <id>spring-snapshots</id>
+            <name>Spring Snapshots</name>
+            <url>https://repo.spring.io/snapshot</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+        </repository>
+    </repositories>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>spring-snapshots</id>
+            <name>Spring Snapshots</name>
+            <url>https://repo.spring.io/snapshot</url>
+        </pluginRepository>
+    </pluginRepositories>
+
+</project>
