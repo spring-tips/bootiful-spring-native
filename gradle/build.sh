@@ -3,4 +3,4 @@
 # this build has customized build.gradle and
 # settings.gradle configurations
 #./gradlew nativeBuild
-./gradlew nativeTest
+./gradlew nativeTest nativeBuild

@@ -8,4 +8,4 @@ pluginManagement {
 		mavenCentral()
 	}
 }
-rootProject.name = 'gradle'
+rootProject.name = 'gradle-build'
