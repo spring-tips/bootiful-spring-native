@@ -1,0 +1,37 @@
+plugins {
+	id 'org.springframework.boot' version '2.5.0'
+	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+	id 'org.springframework.experimental.aot' version '0.10.0-SNAPSHOT'
+	id 'java'
+	id 'org.graalvm.buildtools.native' version '0.1.0-SNAPSHOT'
+}
+
+group = 'com.example'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '1.8'
+
+repositories {
+	mavenLocal()
+	maven { url 'https://repo.spring.io/release' }
+	maven { url 'https://repo.spring.io/milestone' }
+	maven { url 'https://repo.spring.io/snapshot' }
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter'
+	//implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+test {
+	useJUnitPlatform()
+}
+
+bootBuildImage {
+	// TODO Bring back "paketobuildpacks/builder:tiny" before 0.10.0 release
+	builder = "dmikusa/graalvm-tiny"
+	environment = [
+			"BP_NATIVE_IMAGE" : "true"
+	]
+}
