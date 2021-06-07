@@ -1,3 +1,6 @@
 #!/usr/bin/env bash
 
-${PWD%/*samples/*}/scripts/compileWithGradle.sh
+# this build has customized build.gradle and
+# settings.gradle configurations
+#./gradlew nativeBuild
+./gradlew nativeTest

@@ -8,4 +8,4 @@ pluginManagement {
 		mavenCentral()
 	}
 }
-rootProject.name = 'commandlinerunner-gradle'
+rootProject.name = 'gradle'

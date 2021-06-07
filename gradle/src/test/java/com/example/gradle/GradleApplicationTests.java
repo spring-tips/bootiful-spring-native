@@ -1,14 +1,13 @@
-package com.example.commandlinerunner;
+package com.example.gradle;
 
 import org.junit.jupiter.api.Test;
-
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-public class CommandlinerunnerApplicationTests {
+class GradleApplicationTests {
 
 	@Test
-	public void contextLoads() {
+	void contextLoads() {
 	}
 
 }
