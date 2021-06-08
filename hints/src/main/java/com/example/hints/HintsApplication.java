@@ -65,7 +65,6 @@ import java.time.Instant;
  * trigger, and compiler options Below, I specify that I want enable-https for HTTPS
  * network calls.
  */
-
 @NativeHint(
 		// initialization = {} ,
 		// trigger = ..
