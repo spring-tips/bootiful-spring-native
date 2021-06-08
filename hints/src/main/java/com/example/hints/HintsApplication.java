@@ -47,15 +47,17 @@ public class HintsApplication {
 		@Value("file:///${user.home}/output") Resource resource) {
 		return args -> {
 			var written = resource.getFile();
-			var customer = new Customer(1, "Andy");
+
 
 			try (var out = new ObjectOutputStream(new FileOutputStream(written))) {
+				var customer = new Customer(1, "Andy");
 				out.writeObject(customer);
+				System.out.println("wrote: " + customer);
 			}
 
 			try (var in = new ObjectInputStream( new FileInputStream( written))) {
-				var readCustomer = (Customer) in.readObject() ;
-				System.out.println("read: " + readCustomer);
+				var customer = (Customer) in.readObject() ;
+				System.out.println("read: " + customer);
 			}
 		};
 	}
