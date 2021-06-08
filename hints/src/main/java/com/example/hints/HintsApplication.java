@@ -36,10 +36,6 @@ import java.time.Instant;
 	* I've grouped the two hints together using a @NativeHint
 	*/
 @JdkProxyHint(types = OrderService.class)
-//@NativeHint(
-//	jdkProxies = ,
-//	types = @TypeHint(types = OrderService.class, access = AccessBits.ALL)
-//)
 
 /*
 	* (Reflective) Types
