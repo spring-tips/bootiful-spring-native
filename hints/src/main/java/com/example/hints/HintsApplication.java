@@ -8,9 +8,11 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.nativex.hint.ResourceHint;
 import org.springframework.nativex.hint.SerializationHint;
+import org.springframework.util.FileCopyUtils;
 
 import java.io.*;
 
@@ -28,7 +30,7 @@ import java.io.*;
 	* this demonstrates how to contribute a serialization hint on the odd occasion you want
 	* to, em, serialize a Java object. Hey, stranger things have happened! Quartz requires this!
 	*/
-@SerializationHint (types = Customer.class)
+@SerializationHint(types = Customer.class)
 
 @SpringBootApplication
 public class HintsApplication {
@@ -38,12 +40,21 @@ public class HintsApplication {
 	}
 
 	@Bean
-	ApplicationRunner runner() {
-		return event -> System.out.println("hello, world!");
+	ApplicationRunner resourceRunner() {
+		return args -> {
+			var a = "data/airline";
+			var b = "safety.csv";
+			var url = new ClassPathResource(a + "-" + b);
+			try (var in = new InputStreamReader(url.getInputStream())) {
+				var contents = FileCopyUtils.copyToString(in);
+				var lines = contents.split("\r");
+				System.out.println("there are " + lines.length + " lines");
+			}
+		};
 	}
 
 	@Bean
-	ApplicationRunner serialization(
+	ApplicationRunner serializationRunner(
 		@Value("file:///${user.home}/output") Resource resource) {
 		return args -> {
 			var written = resource.getFile();
@@ -55,24 +66,21 @@ public class HintsApplication {
 				System.out.println("wrote: " + customer);
 			}
 
-			try (var in = new ObjectInputStream( new FileInputStream( written))) {
-				var customer = (Customer) in.readObject() ;
+			try (var in = new ObjectInputStream(new FileInputStream(written))) {
+				var customer = (Customer) in.readObject();
 				System.out.println("read: " + customer);
 			}
 		};
 	}
 
-
 }
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 class Customer implements Serializable {
-
-
 	private int id;
 	private String name;
-
 }
 
 // need to demonstrate serialization
