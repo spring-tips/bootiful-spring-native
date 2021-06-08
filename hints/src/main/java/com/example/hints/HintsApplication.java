@@ -3,6 +3,8 @@ package com.example.hints;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.aopalliance.intercept.MethodInterceptor;
+import org.springframework.aop.framework.ProxyFactoryBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
@@ -18,6 +20,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.time.Instant;
 
 
 /*
@@ -134,6 +137,36 @@ public class HintsApplication {
 			cancelOrderMethod.invoke(proxy, 5);
 		};
 	}
+
+	@Bean
+	ApplicationRunner aotProxiesRunner() {
+		return args -> {
+			var clazzName = "com.example" + "." +
+				"hints.ConcreteOrderService";
+			var concrete = new ConcreteOrderService();
+			var clazz = Class.forName(clazzName);
+			var pfb = new ProxyFactoryBean();
+			pfb.setProxyTargetClass(true);
+			pfb.setTarget(concrete );
+			pfb.addAdvice((MethodInterceptor) methodInvocation -> {
+				try {
+					System.out.println("#====================");
+
+					System.out.println("> starting method invocation at " + Instant.now());
+					return methodInvocation.proceed();
+				}
+				finally {
+					System.out.println("> finishing method invocation at " + Instant.now());
+					System.out.println("#--------------------");
+				}
+			});
+			var aotProxy = pfb.getObject();
+			var method = clazz.getMethod("cancelOrder", int.class);
+			method.invoke(aotProxy, 2);
+		};
+
+	}
+
 }
 
 // this is still grey!
@@ -154,6 +187,14 @@ class Customer implements Serializable {
 
 interface OrderService {
 	void cancelOrder(int orderId);
+}
+
+class ConcreteOrderService {
+
+	public void cancelOrder(int orderId) {
+		System.out.println("one cancellation for order #" + orderId + ", coming right up!");
+	}
+
 }
 
 // need to demonstrate jdk proxies
