@@ -67,18 +67,18 @@ public class HintsApplication {
 
 	@Bean
 	ApplicationRunner serializationRunner(
-		@Value("file:///${user.home}/output") Resource resource) {
+		@Value("file:///${user.home}/output") Resource outputResource) {
 		return args -> {
-			var written = resource.getFile();
 
+			var outputFile = outputResource.getFile();
 
-			try (var out = new ObjectOutputStream(new FileOutputStream(written))) {
+			try (var out = new ObjectOutputStream(new FileOutputStream(outputFile))) {
 				var customer = new Customer(1, "Andy");
 				out.writeObject(customer);
 				System.out.println("wrote: " + customer);
 			}
 
-			try (var in = new ObjectInputStream(new FileInputStream(written))) {
+			try (var in = new ObjectInputStream(new FileInputStream(outputFile))) {
 				var customer = (Customer) in.readObject();
 				System.out.println("read: " + customer);
 			}
