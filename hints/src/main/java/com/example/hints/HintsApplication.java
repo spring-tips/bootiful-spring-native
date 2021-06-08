@@ -17,8 +17,10 @@ import org.springframework.nativex.hint.TypeHint;
 import org.springframework.util.FileCopyUtils;
 
 import java.io.*;
-
-
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 
 
 /*
@@ -94,6 +96,31 @@ public class HintsApplication {
 			System.out.println("reflective result: " + result);
 		};
 	}
+
+	@Bean
+	ApplicationRunner jdkProxiesRunner() {
+		return args -> {
+
+			var cl = ClassLoader.getSystemClassLoader();
+			var ih = new InvocationHandler() {
+
+				@Override
+				public Object invoke(Object proxy, Method method, Object[] args) throws InvocationTargetException, IllegalAccessException {
+
+					if (method.getName().equals("cancelOrder")) {
+						System.out.println("You want order #" + args[0] + " cancelled? Too bad! Not doing it!");
+						return null;
+					}
+
+					return method.invoke(proxy, args);
+				}
+			};
+			var proxy = (OrderService) Proxy.newProxyInstance(cl,
+				new Class<?>[]{OrderService.class}, ih);
+			proxy.cancelOrder(2);
+
+		};
+	}
 }
 
 // this is still grey!
@@ -110,6 +137,19 @@ class SimpleCustomerService {
 class Customer implements Serializable {
 	private int id;
 	private String name;
+}
+
+
+class SimpleOrderService implements OrderService {
+
+	@Override
+	public void cancelOrder(int orderId) {
+		System.out.println("cancelling #" + orderId + "!");
+	}
+}
+
+interface OrderService {
+	void cancelOrder(int orderId);
 }
 
 // need to demonstrate jdk proxies
