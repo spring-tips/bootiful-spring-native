@@ -10,10 +10,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.nativex.hint.AccessBits;
-import org.springframework.nativex.hint.ResourceHint;
-import org.springframework.nativex.hint.SerializationHint;
-import org.springframework.nativex.hint.TypeHint;
+import org.springframework.nativex.hint.*;
 import org.springframework.util.FileCopyUtils;
 
 import java.io.*;
@@ -24,10 +21,29 @@ import java.lang.reflect.Proxy;
 
 
 /*
+	* JDK Proxies
+	* this demonstrates using a stock standard JDK proxy. As we also access it reflectively,
+	* I've grouped the two hints together using a @NativeHint
+	*/
+@NativeHint(
+	jdkProxies = @JdkProxyHint(types = OrderService.class),
+	types = @TypeHint(types = OrderService.class, access = AccessBits.ALL)
+)
+@TypeHint(types = OrderService.class, access = AccessBits.ALL)
+@JdkProxyHint(types = OrderService.class)
+/*
 	* (Reflective) Types
 	* Demonstrates reflectively creating and using an object (CustomerService)
 	*/
 @TypeHint(typeNames = "com.example.hints.SimpleCustomerService", access = AccessBits.ALL)
+
+
+/*
+	* Serialization:
+	* This demonstrates how to contribute a serialization hint on the odd occasion you want
+	* to, um, serialize a Java object. Hey, stranger things have happened! Quartz requires this!
+	*/
+@SerializationHint(types = Customer.class)
 
 /*
 	* Resources:
@@ -37,12 +53,6 @@ import java.lang.reflect.Proxy;
 	*/
 @ResourceHint(patterns = "data/airline-safety.csv")
 
-/*
-	* Serialization:
-	* this demonstrates how to contribute a serialization hint on the odd occasion you want
-	* to, em, serialize a Java object. Hey, stranger things have happened! Quartz requires this!
-	*/
-@SerializationHint(types = Customer.class)
 
 @SpringBootApplication
 public class HintsApplication {
@@ -118,13 +128,12 @@ public class HintsApplication {
 			var clazzName = "com.example.hints" + "." + "OrderService";
 			var clazz = Class.forName(clazzName);
 			var proxy = Proxy.newProxyInstance(cl, new Class<?>[]{clazz}, ih);
-			var cancelOrderMethod = proxy.getClass().getMethod("cancelOrder", int.class);
+			for (var i : proxy.getClass().getInterfaces())
+				System.out.println("interface found: " + i.getName() + '.');
+			var cancelOrderMethod = clazz.getMethod("cancelOrder", int.class);
 			cancelOrderMethod.invoke(proxy, 5);
-
 		};
 	}
-
-
 }
 
 // this is still grey!
@@ -143,18 +152,10 @@ class Customer implements Serializable {
 	private String name;
 }
 
-
-class SimpleOrderService implements OrderService {
-
-	@Override
-	public void cancelOrder(int orderId) {
-		System.out.println("cancelling #" + orderId + "!");
-	}
-}
-
 interface OrderService {
 	void cancelOrder(int orderId);
 }
 
 // need to demonstrate jdk proxies
 // need to demonstrate spring proxies
+// need to show passing options using @NativeHint (options = ...)
