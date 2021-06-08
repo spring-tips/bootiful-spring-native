@@ -10,12 +10,22 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.nativex.hint.AccessBits;
 import org.springframework.nativex.hint.ResourceHint;
 import org.springframework.nativex.hint.SerializationHint;
+import org.springframework.nativex.hint.TypeHint;
 import org.springframework.util.FileCopyUtils;
 
 import java.io.*;
 
+
+
+
+/*
+	* (Reflective) Types
+	* Demonstrates reflectively creating and using an object (CustomerService)
+	*/
+@TypeHint(typeNames = "com.example.hints.SimpleCustomerService", access = AccessBits.ALL)
 
 /*
 	* Resources:
@@ -73,6 +83,25 @@ public class HintsApplication {
 		};
 	}
 
+	@Bean
+	ApplicationRunner reflectionRunner() {
+		return args -> {
+			var clazzName = "com.example" + "." + "hints.SimpleCustomerService";
+			var clazz = Class.forName(clazzName);
+			var instance = clazz.getDeclaredConstructors()[0].newInstance();
+			var methodForFindById = clazz.getMethod("findById", int.class);
+			var result = methodForFindById.invoke(instance, 2);
+			System.out.println("reflective result: " + result);
+		};
+	}
+}
+
+// this is still grey!
+class SimpleCustomerService {
+
+	public Customer findById(int id) {
+		return new Customer(id, "Jorge");
+	}
 }
 
 @Data
@@ -83,7 +112,5 @@ class Customer implements Serializable {
 	private String name;
 }
 
-// need to demonstrate serialization
 // need to demonstrate jdk proxies
 // need to demonstrate spring proxies
-// need to demonstrate
