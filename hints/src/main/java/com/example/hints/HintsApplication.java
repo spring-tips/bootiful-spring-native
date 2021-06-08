@@ -115,12 +115,16 @@ public class HintsApplication {
 					return method.invoke(proxy, args);
 				}
 			};
-			var proxy = (OrderService) Proxy.newProxyInstance(cl,
-				new Class<?>[]{OrderService.class}, ih);
-			proxy.cancelOrder(2);
+			var clazzName = "com.example.hints" + "." + "OrderService";
+			var clazz = Class.forName(clazzName);
+			var proxy = Proxy.newProxyInstance(cl, new Class<?>[]{clazz}, ih);
+			var cancelOrderMethod = proxy.getClass().getMethod("cancelOrder", int.class);
+			cancelOrderMethod.invoke(proxy, 5);
 
 		};
 	}
+
+
 }
 
 // this is still grey!
