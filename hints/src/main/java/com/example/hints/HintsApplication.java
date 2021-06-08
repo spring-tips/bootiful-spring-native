@@ -22,18 +22,25 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.time.Instant;
 
+// need to show passing options using @NativeHint (options = ...)
+
+/*
+	* AOT Proxies
+	* this demonstrates how to make concrete subclass-based proxies work
+	*/
+@AotProxyHint(targetClass = ConcreteOrderService.class, proxyFeatures = ProxyBits.IS_STATIC)
 
 /*
 	* JDK Proxies
 	* this demonstrates using a stock standard JDK proxy. As we also access it reflectively,
 	* I've grouped the two hints together using a @NativeHint
 	*/
-@NativeHint(
-	jdkProxies = @JdkProxyHint(types = OrderService.class),
-	types = @TypeHint(types = OrderService.class, access = AccessBits.ALL)
-)
-@TypeHint(types = OrderService.class, access = AccessBits.ALL)
 @JdkProxyHint(types = OrderService.class)
+//@NativeHint(
+//	jdkProxies = ,
+//	types = @TypeHint(types = OrderService.class, access = AccessBits.ALL)
+//)
+
 /*
 	* (Reflective) Types
 	* Demonstrates reflectively creating and using an object (CustomerService)
@@ -147,7 +154,7 @@ public class HintsApplication {
 			var clazz = Class.forName(clazzName);
 			var pfb = new ProxyFactoryBean();
 			pfb.setProxyTargetClass(true);
-			pfb.setTarget(concrete );
+			pfb.setTarget(concrete);
 			pfb.addAdvice((MethodInterceptor) methodInvocation -> {
 				try {
 					System.out.println("#====================");
@@ -197,6 +204,4 @@ class ConcreteOrderService {
 
 }
 
-// need to demonstrate jdk proxies
-// need to demonstrate spring proxies
-// need to show passing options using @NativeHint (options = ...)
+
