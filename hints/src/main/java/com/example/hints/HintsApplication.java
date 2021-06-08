@@ -14,6 +14,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.nativex.hint.*;
 import org.springframework.util.FileCopyUtils;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.io.*;
 import java.lang.reflect.InvocationHandler;
@@ -59,7 +60,19 @@ import java.time.Instant;
 	*/
 @ResourceHint(patterns = "data/airline-safety.csv")
 
+/*
+	* NativeHint:
+	*
+	* NativeHint is an umbrella type. You can use it specify
+	* other hints, an activation trigger, and compiler options
+	* Below, I specify that I want enable-https for HTTPS network calls.
+	*/
 
+@NativeHint(
+	//	initialization = {} ,
+	//	trigger = ..
+	options = "--enable-https"
+)
 @SpringBootApplication
 public class HintsApplication {
 
@@ -110,6 +123,21 @@ public class HintsApplication {
 			var methodForFindById = clazz.getMethod("findById", int.class);
 			var result = methodForFindById.invoke(instance, 2);
 			System.out.println("reflective result: " + result);
+		};
+	}
+
+
+	@Bean
+	ApplicationRunner httpsOptionRunner(WebClient.Builder builder) {
+		return args -> {
+			var http = builder.build();
+			var json = http
+				.get()
+				.uri("https://start.spring.io/")
+				.retrieve()
+				.bodyToMono(String.class)
+				.block();
+			System.out.println("json from the Spring Initializr: " + json);
 		};
 	}
 
