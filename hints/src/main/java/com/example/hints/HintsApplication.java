@@ -1,40 +1,28 @@
 package com.example.hints;
 
-import another.framework.PoliteProxy;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.springframework.aop.framework.ProxyFactoryBean;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.AutoConfigurationPackages;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
-import org.springframework.core.env.Environment;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.nativex.hint.*;
-import org.springframework.stereotype.Component;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.io.*;
-import java.lang.annotation.*;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.time.Instant;
-import java.util.HashSet;
 
-// need to show passing options using @NativeHint (options = ...)
 
 /*
 	* AOT Proxies
@@ -46,8 +34,8 @@ import java.util.HashSet;
 	* JDK Proxies this demonstrates using a stock standard JDK proxy. As we also access it
 	* reflectively, I've grouped the two hints together using a @NativeHint
 	*/
-@JdkProxyHint(types = OrderService.class)
-
+//@JdkProxyHint(types = OrderService.class)
+//TODO: note that this hint we also enable later through an external set of hints that we bring in on the classpath
 /*
 	* (Reflective) Types Demonstrates reflectively creating and using an object
 	* (CustomerService)
@@ -138,7 +126,7 @@ public class HintsApplication {
 		return args -> {
 			var http = builder.build();
 			var json = http.get().uri("https://start.spring.io/").retrieve().bodyToMono(String.class).block();
-			System.out.println("json from the Spring Initializr: " + json);
+			System.out.println("json from the Spring Initializr: " + json.substring(0, 200)  + "...");
 		};
 	}
 
@@ -161,13 +149,15 @@ public class HintsApplication {
 					return method.invoke(proxy, args);
 				}
 			};
-			var clazzName = "com.example.hints" + "." + "OrderService";
+			var period = Character.toUpperCase('.');
+			var clazzName = "com.example.hints" +  period + "OrderService";
 			var clazz = Class.forName(clazzName);
 			var proxy = Proxy.newProxyInstance(cl, new Class<?>[]{clazz}, ih);
 			for (var i : proxy.getClass().getInterfaces())
 				System.out.println("interface found: " + i.getName() + '.');
 			var cancelOrderMethod = clazz.getMethod("cancelOrder", int.class);
 			cancelOrderMethod.invoke(proxy, 5);
+			System.out.println("finished invoking JDK proxy for " + clazzName +'.');
 		};
 	}
 
@@ -183,7 +173,6 @@ public class HintsApplication {
 			pfb.addAdvice((MethodInterceptor) methodInvocation -> {
 				try {
 					System.out.println("#====================");
-
 					System.out.println("> starting method invocation at " + Instant.now());
 					return methodInvocation.proceed();
 				}
