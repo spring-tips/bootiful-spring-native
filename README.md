@@ -6,8 +6,10 @@
 * reactive (i did this one twice in the video, so skip to the end of the video and work backwarsd to the beginning. i scrapped the entire first take)
 
 ## Local Builds 
+* i think i should do a separate section on how to setup graalvm on ur local machine 
+* Gradle - i spoke about graalvm configuration on my machine here. remove that. no need for it. ill do a standalone section on that.
 * Maven
-* Gradle 
+
 
 ## Testing 
 * check out that we have test binaries for both the gradle and Maven apps
