@@ -1,27 +1,38 @@
 package com.example.hints;
 
+import another.framework.PoliteProxy;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.springframework.aop.framework.ProxyFactoryBean;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.AutoConfigurationPackages;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
+import org.springframework.core.env.Environment;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.nativex.hint.*;
+import org.springframework.stereotype.Component;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.io.*;
+import java.lang.annotation.*;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.time.Instant;
+import java.util.HashSet;
 
 // need to show passing options using @NativeHint (options = ...)
 
@@ -32,43 +43,43 @@ import java.time.Instant;
 @AotProxyHint(targetClass = ConcreteOrderService.class, proxyFeatures = ProxyBits.IS_STATIC)
 
 /*
- * JDK Proxies this demonstrates using a stock standard JDK proxy. As we also access it
- * reflectively, I've grouped the two hints together using a @NativeHint
- */
+	* JDK Proxies this demonstrates using a stock standard JDK proxy. As we also access it
+	* reflectively, I've grouped the two hints together using a @NativeHint
+	*/
 @JdkProxyHint(types = OrderService.class)
 
 /*
- * (Reflective) Types Demonstrates reflectively creating and using an object
- * (CustomerService)
- */
+	* (Reflective) Types Demonstrates reflectively creating and using an object
+	* (CustomerService)
+	*/
 @TypeHint(typeNames = "com.example.hints.SimpleCustomerService", access = AccessBits.ALL)
 
 /*
- * Serialization: This demonstrates how to contribute a serialization hint on the odd
- * occasion you want to, um, serialize a Java object. Hey, stranger things have happened!
- * Quartz requires this!
- */
+	* Serialization: This demonstrates how to contribute a serialization hint on the odd
+	* occasion you want to, um, serialize a Java object. Hey, stranger things have happened!
+	* Quartz requires this!
+	*/
 @SerializationHint(types = Customer.class)
 
 /*
- * Resources: I couldn't figure out how to need this hint in the first place, at first!
- * the library on which this code depends, and in which this custom resource lives,
- * concatenates two strings with data in a folder to finally break so that we can use
- * this!
- */
+	* Resources: I couldn't figure out how to need this hint in the first place, at first!
+	* the library on which this code depends, and in which this custom resource lives,
+	* concatenates two strings with data in a folder to finally break so that we can use
+	* this!
+	*/
 @ResourceHint(patterns = "data/airline-safety.csv")
 
 /*
- * NativeHint:
- *
- * NativeHint is an umbrella type. You can use it specify other hints, an activation
- * trigger, and compiler options Below, I specify that I want enable-https for HTTPS
- * network calls.
- */
+	* NativeHint:
+	*
+	* NativeHint is an umbrella type. You can use it specify other hints, an activation
+	* trigger, and compiler options Below, I specify that I want enable-https for HTTPS
+	* network calls.
+	*/
 @NativeHint(
-		// initialization = {} ,
-		// trigger = ..
-		options = "--enable-https")
+	// initialization = {} ,
+	// trigger = ..
+	options = "--enable-https")
 @SpringBootApplication
 public class HintsApplication {
 
@@ -89,6 +100,7 @@ public class HintsApplication {
 			}
 		};
 	}
+
 
 	@Bean
 	ApplicationRunner serializationRunner(@Value("file:///${user.home}/output") Resource outputResource) {
@@ -139,7 +151,7 @@ public class HintsApplication {
 
 				@Override
 				public Object invoke(Object proxy, Method method, Object[] args)
-						throws InvocationTargetException, IllegalAccessException {
+					throws InvocationTargetException, IllegalAccessException {
 
 					if (method.getName().equals("cancelOrder")) {
 						System.out.println("You want order #" + args[0] + " cancelled? Too bad! Not doing it!");
@@ -151,7 +163,7 @@ public class HintsApplication {
 			};
 			var clazzName = "com.example.hints" + "." + "OrderService";
 			var clazz = Class.forName(clazzName);
-			var proxy = Proxy.newProxyInstance(cl, new Class<?>[] { clazz }, ih);
+			var proxy = Proxy.newProxyInstance(cl, new Class<?>[]{clazz}, ih);
 			for (var i : proxy.getClass().getInterfaces())
 				System.out.println("interface found: " + i.getName() + '.');
 			var cancelOrderMethod = clazz.getMethod("cancelOrder", int.class);
@@ -222,3 +234,4 @@ class ConcreteOrderService {
 	}
 
 }
+
