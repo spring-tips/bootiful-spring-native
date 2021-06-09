@@ -16,4 +16,5 @@ public class NativeMavenApplication {
 	ApplicationRunner runner() {
 		return event -> System.out.println("Hello, world!");
 	}
+
 }

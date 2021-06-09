@@ -14,9 +14,9 @@ class BootifulCsvAnalyser {
 	@Bean
 	ApplicationRunner airlineSafetyApplicationRunner() {
 		return args -> {
-			var a  = "data/airline";
-			var b = "-safety.csv" ;
-			var url = new ClassPathResource( a + b);
+			var a = "data/airline";
+			var b = "-safety.csv";
+			var url = new ClassPathResource(a + b);
 			try (var in = new InputStreamReader(url.getInputStream())) {
 				var contents = FileCopyUtils.copyToString(in);
 				var lines = contents.split("\r");
