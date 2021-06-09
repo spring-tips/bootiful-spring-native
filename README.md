@@ -2,7 +2,8 @@
 
 ## Basics with Buildpacks
 * traditional  
-* imperative  
+  * at some point i start talking about buildpacks. let's see if i can copy and paste the buildpacks segment from kubernetes native java video? 
+* reactive  
 
 ## Local Builds 
 * Maven
